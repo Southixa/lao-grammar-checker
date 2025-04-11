@@ -30,40 +30,33 @@ console.log(results);
 */
 
 // Example 2: Finding grammar errors
-const textWithErrors = "່ກ ເດືອນເ ຜູ້ ພຽງຽ ະ";
+const textWithErrors = "ທາງເດ່ອນແມ່ນຫ່";
 const errorResults = laoGrammarCheck(textWithErrors);
 console.log(errorResults);
 /* Output:
 [
-  { word: "່ກ", startIndex: 0, endIndex: 1, grammarCorrect: false },
-  { word: " ", startIndex: 2, endIndex: 2, grammarCorrect: true },
-  { word: "ເດືອນ", startIndex: 3, endIndex: 7, grammarCorrect: true },
-  { word: "ເ", startIndex: 8, endIndex: 8, grammarCorrect: false },
-  { word: " ", startIndex: 9, endIndex: 9, grammarCorrect: true },
-  { word: "ຜູ້", startIndex: 10, endIndex: 12, grammarCorrect: true },
-  { word: " ", startIndex: 13, endIndex: 13, grammarCorrect: true },
-  { word: "ພຽ", startIndex: 14, endIndex: 15, grammarCorrect: false },
-  { word: "ງຽ", startIndex: 16, endIndex: 17, grammarCorrect: false },
-  { word: " ", startIndex: 18, endIndex: 18, grammarCorrect: true },
-  { word: "ະ", startIndex: 19, endIndex: 19, grammarCorrect: false }
+  { word: "ທາງ", startIndex: 0, endIndex: 2, grammarCorrect: true },
+  { word: "ເດ່ອນ", startIndex: 3, endIndex: 7, grammarCorrect: false },
+  { word: "ແມ່ນ", startIndex: 8, endIndex: 11, grammarCorrect: true },
+  { word: "ຫ່", startIndex: 12, endIndex: 13, grammarCorrect: false },
 ]
 */
 
-// Example 3: Mixed Lao and non-Lao text
-const mixedText = "ພາສາລາວ Lao language 101";
+// Example 3: Mixed Lao, non-Lao, and incorrect words
+const mixedText = "lao 123ປທ້ດເທດgrammarລວ!#$";
 const mixedResults = laoGrammarCheck(mixedText);
 console.log(mixedResults);
 /* Output:
 [
-  { word: "ພາ", startIndex: 0, endIndex: 1, grammarCorrect: true },
-  { word: "ສາ", startIndex: 2, endIndex: 3, grammarCorrect: true },
-  { word: "ລາວ", startIndex: 4, endIndex: 6, grammarCorrect: true },
-  { word: " ", startIndex: 7, endIndex: 7, grammarCorrect: true },
-  { word: "Lao", startIndex: 8, endIndex: 10, grammarCorrect: true },
-  { word: " ", startIndex: 11, endIndex: 11, grammarCorrect: true },
-  { word: "language", startIndex: 12, endIndex: 19, grammarCorrect: true },
-  { word: " ", startIndex: 20, endIndex: 20, grammarCorrect: true },
-  { word: "101", startIndex: 21, endIndex: 23, grammarCorrect: true }
+  { word: "lao", startIndex: 0, endIndex: 2, grammarCorrect: true },
+  { word: " ", startIndex: 3, endIndex: 3, grammarCorrect: true },
+  { word: "123", startIndex: 4, endIndex: 6, grammarCorrect: true },
+  { word: "ປ", startIndex: 7, endIndex: 7, grammarCorrect: false },
+  { word: "ທ້ດ", startIndex: 8, endIndex: 10, grammarCorrect: false },
+  { word: "ເທດ", startIndex: 11, endIndex: 13, grammarCorrect: true },
+  { word: "grammar", startIndex: 14, endIndex: 20, grammarCorrect: true },
+  { word: "ລວ", startIndex: 21, endIndex: 22, grammarCorrect: false },
+  { word: "!#$", startIndex: 23, endIndex: 25, grammarCorrect: true }
 ]
 */
 ```

@@ -17,8 +17,8 @@ const LAO_CONSONANTS = new Set([
     'ໜ', 'ໝ'
 ]);
 
-// Leading Vowels (Rule 1)
-const LEADING_VOWELS_RULE1 = new Set(['ເ', 'ແ', 'ໂ', 'ໄ']);
+// Leading Vowels (Rule 1 & Rule 3.4)
+const LEADING_VOWELS_RULE1_AND_3 = new Set(['ເ', 'ແ', 'ໂ', 'ໄ', 'ໃ']); // Added 'ໃ' for Rule 3.4
 
 // Top Vowels (Rule 2 & 4)
 const TOP_VOWELS_RULE2 = new Set(['ິ', 'ີ', 'ຶ', 'ື']);
@@ -37,7 +37,27 @@ const VOWEL_IA_RULE5 = 'ຽ';
 // Vowels A/AA (Rule 6)
 const VOWELS_A_AA_RULE6 = new Set(['ະ', 'າ']);
 
-// Vowels/Diacritics for counting
+// --- Sets for New Rules (7-10) ---
+// Vowels/Diacritics for Rule 7
+const VOWELS_RULE7 = new Set(['ະ', 'າ', 'ິ', 'ີ', 'ຶ', 'ື', 'ຸ', 'ູ', 'ໍ', 'ຼ', 'ັ', 'ົ']);
+
+// Vowels/Diacritics for Rule 8 (Identical to COUNTABLE_VOWELS_DIACRITICS)
+const VOWELS_DIACRITICS_RULE8 = new Set([
+    'ະ', 'າ', 'ິ', 'ີ', 'ຶ', 'ື', 'ຸ', 'ູ', 'ໍ', 'ຼ', '໊', 'ັ', 'ົ', '່', '້', '໋', '໌', 'ຽ'
+]);
+
+// Tone/Cancellation Marks for Rule 9
+const TONES_CANCEL_RULE9 = new Set(['່', '້', '໋', '໌']);
+
+// Vowels A/IA for Rule 10 (currentChar)
+const VOWELS_A_IA_RULE10 = new Set(['າ', 'ຽ']);
+
+// Vowels/Diacritics for Rule 10 (previousChar check)
+const VOWELS_DIACRITICS_RULE10_PREV = new Set([
+    'ະ', 'າ', 'ິ', 'ີ', 'ຶ', 'ື', 'ຸ', 'ູ', 'ໍ', '໊', 'ັ', 'ົ', '໋', '໌', 'ຽ'
+]);
+
+// Vowels/Diacritics for counting (Used for post-loop checks)
 const COUNTABLE_VOWELS_DIACRITICS = new Set([
     'ະ', 'າ', 'ິ', 'ີ', 'ຶ', 'ື', 'ຸ', 'ູ', 'ໍ', 'ຼ', '໊', 'ັ', 'ົ', '່', '້', '໋', '໌', 'ຽ'
     // Note: 'າ' is counted here, but 'ໃ', 'ໄ', 'ເົາ', 'ຳ' are typically part of the word structure itself
@@ -74,13 +94,39 @@ function checkLaoWordGrammar(word: string): boolean {
 
         // Word-Level Guard 1: Single character word (usually invalid unless it's a special case not covered here)
         if (word.length === 1) {
-        // Exception: Allow 'ໆ' (Mai Yamok) as a single valid character word
-        return word === 'ໆ'; // Return true only if it's Mai Yamok
+            // Exception: Allow 'ໆ' (Mai Yamok) as a single valid character word
+            return word === 'ໆ'; // Return true only if it's Mai Yamok
         }
 
-        // Word-Level Guard 2: First character is not Lao
+        // Word-Level Guard 2: Specific check for single 'ຳ'
+        if (word === 'ຳ') {
+            return false;
+        }
+
+        // Word-Level Guard 3: First character is not Lao
         if (!isLaoCharacter(word[0])) {
-        return true; // Non-Lao words are considered valid
+            return true; // Non-Lao words are considered valid
+        }
+
+        // Word-Level Guard 4: Check issues in 2-char words
+        if (word.length === 2) {
+            const isConsonant0 = LAO_CONSONANTS.has(word[0]);
+            const isConsonant1 = LAO_CONSONANTS.has(word[1]);
+
+            // 4.1 Check for two consecutive consonants
+            if (isConsonant0 && isConsonant1) {
+                return false;
+            }
+
+            // 4.2 Check for identical characters (excluding 'ເເ')
+            if (word[0] === word[1] && word !== 'ເເ') {
+               return false;
+            }
+        }
+
+        // Word-Level Guard 5: Check for identical characters in 3-char words
+        if (word.length === 3 && word[0] === word[1] && word[1] === word[2]) {
+            return false;
         }
 
         let vowelCount = 0;
@@ -93,6 +139,7 @@ function checkLaoWordGrammar(word: string): boolean {
             const previousChar2 = i > 1 ? word[i - 2] : null;
             const previousChar3 = i > 2 ? word[i - 3] : null;
             const nextChar = i < word.length - 1 ? word[i + 1] : null;
+            const nextChar2 = i < word.length - 2 ? word[i + 2] : null;
 
             // --- Character Counting ---
             if (LAO_CONSONANTS.has(currentChar)) {
@@ -104,7 +151,7 @@ function checkLaoWordGrammar(word: string): boolean {
             // --- Rule Checks ---
 
             // Rule 1: Check ['ເ', 'ແ', 'ໂ', 'ໄ']
-            if (LEADING_VOWELS_RULE1.has(currentChar)) {
+            if (LEADING_VOWELS_RULE1_AND_3.has(currentChar)) {
                 // 1.1 Must be at index 0
                 if (i !== 0) {
                     // Exception: Allow the second 'ເ' if it's at index 1 and follows another 'ເ'
@@ -136,6 +183,30 @@ function checkLaoWordGrammar(word: string): boolean {
                  if (!prevIsConsonant && !prev2IsConsonant) {
                 return false;
             }
+
+            // 3.2 If word length <= 2, next char must exist
+            if (word.length <= 2 && !nextChar) {
+                return false;
+            }
+
+            // 3.3 If tone mark is at index 1, word length must be >= 3
+            if (i === 1 && word.length < 3) {
+                return false;
+            }
+
+            // 3.4 Check for invalid structure: LeadingVowel + ... + ToneMark + Consonant + Consonant
+            const nextCharIsConsonant = nextChar && LAO_CONSONANTS.has(nextChar);
+            const nextChar2IsConsonant = nextChar2 && LAO_CONSONANTS.has(nextChar2);
+            if (LEADING_VOWELS_RULE1_AND_3.has(word[0]) && nextCharIsConsonant && nextChar2IsConsonant) {
+                return false;
+            }
+
+            // 3.5 If word length is 3, check for invalid Consonant + ToneMark + Consonant structure
+            const prevCharIsConsonantRule35 = previousChar && LAO_CONSONANTS.has(previousChar);
+            const nextCharIsConsonantRule35 = nextChar && LAO_CONSONANTS.has(nextChar);
+            if (word.length === 3 && prevCharIsConsonantRule35 && nextCharIsConsonantRule35) {
+                return false;
+            }
         }
 
         // Rule 4: Check [໊ ໋ ໍ ໌ ົ ັ ິ ີ ຶ ື ຸ ູ ຼ] (excludes Rule 2 chars)
@@ -164,7 +235,39 @@ function checkLaoWordGrammar(word: string): boolean {
                 return false;
             }
             }
-    } // End of character loop
+
+            // Rule 7: Check for consecutive vowels/diacritics from VOWELS_RULE7
+            if (VOWELS_RULE7.has(currentChar) && nextChar && VOWELS_RULE7.has(nextChar)) {
+                return false;
+            }
+
+            // Rule 8: Check for identical consecutive vowels/diacritics from VOWELS_DIACRITICS_RULE8
+            if (VOWELS_DIACRITICS_RULE8.has(currentChar) && nextChar && VOWELS_DIACRITICS_RULE8.has(nextChar) && currentChar === nextChar) {
+                // Re-use Rule 7 exception for 'ເເ'
+                if (!(currentChar === 'ເ' && nextChar === 'ເ')) {
+                    return false;
+                }
+            }
+
+            // Rule 9: Check for consecutive tone/cancellation marks
+            if (TONES_CANCEL_RULE9.has(currentChar) && nextChar && TONES_CANCEL_RULE9.has(nextChar)) {
+                return false;
+            }
+
+            // Rule 10: Check for specific vowels [າ, ຽ] preceded by certain vowels/diacritics OR followed by two consonants
+            if (VOWELS_A_IA_RULE10.has(currentChar)) {
+                // 10.1 Check if preceded by invalid vowel/diacritic
+                if (previousChar && VOWELS_DIACRITICS_RULE10_PREV.has(previousChar)) {
+                    return false;
+                }
+                // 10.2 Check if followed by two consonants
+                const nextIsConsonant = nextChar && LAO_CONSONANTS.has(nextChar);
+                const next2IsConsonant = nextChar2 && LAO_CONSONANTS.has(nextChar2);
+                if (nextIsConsonant && next2IsConsonant) {
+                    return false;
+                }
+            }
+        } // End of character loop
 
         // --- Post-Character Loop Checks ---
         // 1. No consonants found
