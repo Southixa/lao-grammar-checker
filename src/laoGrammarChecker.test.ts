@@ -448,4 +448,25 @@ describe('laoGrammarChecker', () => {
     ];
     expect(laoGrammarChecker(sentence)).toEqual(expected);
   });
+
+  it('should correctly check the word "ເຄື່ອງມື"', () => {
+    const sentence = "ເຄື່ອງມືຫຼື.";
+    const expected: LaoGrammarCheckResult[] = [
+      { word: "ເຄື່ອງ", startIndex: 0, endIndex: 5, grammarCorrect: true },
+      { word: "ມື", startIndex: 6, endIndex: 7, grammarCorrect: true },
+      { word: "ຫຼື", startIndex: 8, endIndex: 10, grammarCorrect: true },
+      { word: ".", startIndex: 11, endIndex: 11, grammarCorrect: true },
+    ];
+    expect(laoGrammarChecker(sentence)).toEqual(expected);
+  });
+
+  it('should correctly check the word "ກະສິກຳ"', () => {
+    const sentence = "ກະສິກຳ";
+    const expected: LaoGrammarCheckResult[] = [
+      { word: "ກະ", startIndex: 0, endIndex: 1, grammarCorrect: true },
+      { word: "ສິ", startIndex: 2, endIndex: 3, grammarCorrect: true },
+      { word: "ກຳ", startIndex: 4, endIndex: 5, grammarCorrect: true },
+    ];
+    expect(laoGrammarChecker(sentence)).toEqual(expected);
+  });
 }); 

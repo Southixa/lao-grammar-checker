@@ -1,6 +1,6 @@
 {
   "name": "lao-grammar-checker",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A utility to check grammar and split Lao language sentences into individual words",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
